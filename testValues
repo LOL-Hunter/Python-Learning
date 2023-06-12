@@ -1,0 +1,70 @@
+from pysettings import tk
+
+
+
+def run(e):
+	uwert = int(vScale.getValue())
+	iwert = int(cScale.getValue())
+	
+	pwert = (uwert*iwert);
+	
+	alarm = 1 if pwert > 790000 or uwert > 1022 else 0
+	
+	uanz = uwert *6 * 2048;
+	uanz = uanz/1000;
+	ianz = iwert *1024;
+	ianz = ianz/10000;
+	leistung = uanz * ianz;
+	leistung = leistung /1000;
+	pwmwert = (pwert/4096)
+	
+	ledanzahl = pwert/4096;
+	data=0
+	if ledanzahl <= 255 and ledanzahl >= 210: data=255
+	if ledanzahl <= 209 and ledanzahl >= 180: data=127
+	if ledanzahl <= 179 and ledanzahl >= 150: data=63
+	if ledanzahl <= 149 and ledanzahl >= 120: data=31
+	if ledanzahl <= 119 and ledanzahl >= 80: data=15
+	if ledanzahl <= 79 and ledanzahl >= 60: data=7
+	if ledanzahl <= 59 and ledanzahl >= 31: data=3
+	if ledanzahl <= 30 and ledanzahl >= 8: data=1
+	
+	strData = str(bin(data))[2:]
+	leds = [out1l, out2l, out3l, out4l, out5l, out6l, out7l, out8l][::-1]
+	for i in range(8):
+		leds[i].setBg("red" if i<=strData.count("1") else "white")
+
+	out1.setText(f"Voltage:{round(uanz, 2)}mV")
+	out2.setText(f"Current:{round(ianz, 2)}mA")
+	out3.setText(f"Power:{round(leistung, 2)}mW")
+	out4.setText(f"PWM {round(pwmwert, 2)}")
+	out5.setText(f"isAlarm:{alarm}")
+	out5.setBg("green" if alarm else "red")
+
+
+master = tk.Tk()
+master.setWindowSize(400, 400)
+
+vScale = tk.Scale(master, from_=1023, to=0, orient=tk.Scale.VERTICAL).place(0, 0, 100, 300).onScroll(run).setValue(0)
+cScale = tk.Scale(master, from_=1023, to=0, orient=tk.Scale.VERTICAL).place(100, 0, 100, 300).onScroll(run).setValue(0)
+
+tk.Label(master).setText("Voltage AD").place(0, 300, 100, 50)
+tk.Label(master).setText("Current AD").place(100, 300, 100, 50)
+
+out1 = tk.Label(master).place(150, 25, 200, 25).setTextOrientation()
+out2 = tk.Label(master).place(150, 50, 200, 25).setTextOrientation()
+out3 = tk.Label(master).place(150, 75, 200, 25).setTextOrientation()
+out4 = tk.Label(master).place(150, 100, 200, 25).setTextOrientation()
+out5 = tk.Label(master).place(150, 125, 200, 25).setTextOrientation()
+
+
+out1l = tk.Label(master).place(360, 15, 10, 10).setTextOrientation()
+out2l = tk.Label(master).place(360, 30, 10, 10).setTextOrientation()
+out3l = tk.Label(master).place(360, 45, 10, 10).setTextOrientation()
+out4l = tk.Label(master).place(360, 60, 10, 10).setTextOrientation()
+out5l = tk.Label(master).place(360, 75, 10, 10).setTextOrientation()
+out6l = tk.Label(master).place(360, 90, 10, 10).setTextOrientation()
+out7l = tk.Label(master).place(360, 105, 10, 10).setTextOrientation()
+out8l = tk.Label(master).place(360, 120, 10, 10).setTextOrientation()
+run("")
+master.mainloop()
