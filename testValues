@@ -1,11 +1,42 @@
-from pysettings import tk
+import os
 
+os.chdir(r"C:\Users\LAO2RT\Documents\Python")
+
+from package import tk
+
+
+R_CURR_MESS = 145.6       #RX1 + R8 Ideal:(150 + 1)
 
 
 def run(e):
-	uwert = int(vScale.getValue())
-	iwert = int(cScale.getValue())
+	"""
+	value = solarVoltage/6
+	AD-Wandler: "adwert = (value/2.048)*1023"
+	SPANNUNG
+		== Schaltung ==
+		Spannung wird als richtiger Wert in Volt übergeben.
+		/6 -> Widerstaende 
+		Am AD-Wandler 0 ... 2.048V -> Siehe Referenz Spannung
+		== Programm ==
+		Einlesen AD-Wandler zu Integer -> 0 ... 1023
+		 / 1000 !!! -> /1023 (Weil 1023 Ad-Werte)
+		 * 6 (Wegen den Widerstaenden)
+		 * 2.048 
+		 * 1000 -> V -> mV
+	STROM:
+		==Schaltung ==
+		
+		R8 Strom enstrpricht spannung dann mit op (20,48) verstärkt.
+		
+		
+		== Programm ==
+		
 	
+	Display Zeigt das 1.023 fache an 
+	"""
+	uwert = (((vScale.getValue()/6)/2.048)*1023)
+	iwert = (((((uwert/1023)*2.048*6) / R_CURR_MESS)*20.48)/2.048)*1023
+	print("Real:", ((uwert/1023)*2.048*6) / R_CURR_MESS)
 	pwert = (uwert*iwert);
 	
 	alarm = 1 if pwert > 790000 or uwert > 1022 else 0
@@ -32,7 +63,7 @@ def run(e):
 	strData = str(bin(data))[2:]
 	leds = [out1l, out2l, out3l, out4l, out5l, out6l, out7l, out8l][::-1]
 	for i in range(8):
-		leds[i].setBg("red" if i<=strData.count("1") else "white")
+		leds[i].setBg(bgs[i] if i<=strData.count("1") else "white")
 
 	out1.setText(f"Voltage:{round(uanz, 2)}mV")
 	out2.setText(f"Current:{round(ianz, 2)}mA")
@@ -45,11 +76,11 @@ def run(e):
 master = tk.Tk()
 master.setWindowSize(400, 400)
 
-vScale = tk.Scale(master, from_=1023, to=0, orient=tk.Scale.VERTICAL).place(0, 0, 100, 300).onScroll(run).setValue(0)
-cScale = tk.Scale(master, from_=1023, to=0, orient=tk.Scale.VERTICAL).place(100, 0, 100, 300).onScroll(run).setValue(0)
+vScale = tk.Scale(master, from_=15, to=0, orient=tk.Scale.VERTICAL).place(0, 0, 100, 300).onScroll(run).setValue(5).setSteps(.01)
+#cScale = tk.Scale(master, from_=1023, to=0, orient=tk.Scale.VERTICAL).place(100, 0, 100, 300).onScroll(run).setValue(0)
 
-tk.Label(master).setText("Voltage AD").place(0, 300, 100, 50)
-tk.Label(master).setText("Current AD").place(100, 300, 100, 50)
+tk.Label(master).setText("Solar Voltage").place(0, 300, 100, 50)
+#tk.Label(master).setText("Current AD").place(100, 300, 100, 50)
 
 out1 = tk.Label(master).place(150, 25, 200, 25).setTextOrientation()
 out2 = tk.Label(master).place(150, 50, 200, 25).setTextOrientation()
@@ -57,7 +88,7 @@ out3 = tk.Label(master).place(150, 75, 200, 25).setTextOrientation()
 out4 = tk.Label(master).place(150, 100, 200, 25).setTextOrientation()
 out5 = tk.Label(master).place(150, 125, 200, 25).setTextOrientation()
 
-
+bgs = ["green", "green", "green", "yellow", "yellow", "yellow", "red", "red"]
 out1l = tk.Label(master).place(360, 15, 10, 10).setTextOrientation()
 out2l = tk.Label(master).place(360, 30, 10, 10).setTextOrientation()
 out3l = tk.Label(master).place(360, 45, 10, 10).setTextOrientation()
